@@ -1,0 +1,32 @@
+version: '2'
+services:
+    nginx:
+        image: nginx:latest
+        ports:
+            - "8083:80"
+        volumes:
+            - ../backend:/code
+            - ./docker/conf/:/etc/nginx/conf.d/
+            - ./docker/www_logs/nginx:/var/log/nginx
+        links:
+            - phpfpm
+    phpfpm:
+        build: docker/dockerContainers/php72-fpm
+        links:
+            - mysql
+        volumes:
+            - ../backend:/code:cached
+            - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+        ports:
+            - "9000:9000"
+    mysql:
+        image: mariadb:10.2.6
+        volumes:
+            - ./docker/mysql-data:/var/lib/mysql
+        ports:
+            - "3307:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: database
+            MYSQL_USER: user
+            MYSQL_PASSWORD: root
